@@ -12,19 +12,23 @@
 
 void delay_ms(uint32_t ms); // Function prototype for delay function
 char buffer[90];
+uint32_t initialClock; // Initial system clock frequency (16 MHz)
+uint32_t finalClock;   // Final system clock frequency (180 MHz)
 
 int main(void){
+    SystemCoreClockUpdate(); // CMSIS function to update SystemCoreClock variable
+    initialClock = SystemCoreClock; // Store the initial clock frequency (16 MHz)
+    SystemClock_Config(); // Configure the system clock to 180 MHz
+    SystemCoreClockUpdate(); // Update SystemCoreClock variable after clock change
+    finalClock = SystemCoreClock; // Store the final clock frequency (180 MHz)
     OLED_Init();
     SH1106_RenderFullScreenLogo();
     delay_ms(4000); // Delay for 4 seconds to display the logo
     OLED_Clear();
     OLED_Print(0, 0, "CPEG222-F26 OLED Test");
-    SystemCoreClockUpdate(); // CMSIS function to update SystemCoreClock variable
-    snprintf(buffer, sizeof(buffer), "Intial Clock: %u MHz  ", SystemCoreClock / 1000000U);               
+    snprintf(buffer, sizeof(buffer), "Initial Clock: %lu MHz  ", initialClock / 1000000U);               
     OLED_Print(5, 0, buffer);
-    SystemClock_Config(); // Configure the system clock to 180 MHz
-    SystemCoreClockUpdate(); // Update SystemCoreClock variable after clock change
-    snprintf(buffer, sizeof(buffer), "Final Clock: %u MHz  ", SystemCoreClock / 1000000U);
+    snprintf(buffer, sizeof(buffer), "Final Clock: %lu MHz  ", finalClock / 1000000U);
     OLED_Print(6, 0, buffer);
     delay_ms(8000); // Delay for 8 seconds to display the clock information
     OLED_Clear();
@@ -37,11 +41,11 @@ int main(void){
     return 0;// Program should never reach here due to infinite loop
 }
 void delay_ms(uint32_t ms){
-    if(SystemCoreClock == 16000000U){
+    if(SystemCoreClock == 16000000U){ // If the system clock is 16 MHz
         for(uint32_t i = 0; i < ms * 2000; i++){
             __NOP();
         }
-    } else if(SystemCoreClock == 180000000U){
+    } else if(SystemCoreClock == 180000000U){ // If the system clock is 180 MHz
         for(uint32_t i = 0; i < ms * 22500; i++){
             __NOP();
         }
